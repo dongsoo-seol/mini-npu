@@ -104,13 +104,12 @@ MAC 함수 호출 구간을 크기별 최소 10회 측정하고 평균 시간을
 
 ## 6. 실행 방법
 
-현재 main.py에는 N×N 배열을 관리하는 Matrix 클래스를 구현했습니다.
-
+현재 main.py에는 배열을 관리하는 Matrix 클래스와 반복문 기반 MAC 계산 함수 mac_score()를 구현했습니다.
 최종 메뉴와 분석 실행 흐름은 아직 구현하지 않았습니다.
 
 배열 기능은 다음 명령으로 검증할 수 있습니다.
 
-python -m unittest -v test_matrix
+python -m unittest -v test_matrix test_mac
 
 구현 후 다음 명령으로 실행하도록 구성할 예정입니다.
 
@@ -126,22 +125,24 @@ data.json은 과제에서 제공한 원본을 확보한 뒤 main.py와 같은 �
 
 ```text
 mini-npu/
-├─ .gitignore
-├─ README.md
-├─ data.json
-├─ main.py
-├─ test_matrix.py
-└─ docs/
-   ├─ 01-setup.md
-   ├─ requirements-checklist.md
-   ├─ 02-matrix.md
-   └─ 02-matrix-test-log.txt
+ .gitignore
+ README.md
+ data.json
+ main.py
+ test_matrix.py
+ test_mac.py
+ docs/
+    01-setup.md
+    requirements-checklist.md
+    02-matrix.md
+    02-matrix-test-log.txt
+    03-mac.md
+    03-mac-test-log.txt
 ```
 
 ## 8. 결과 리포트
 
-아직 프로그램 구현과 데이터 분석을 수행하지 않았습니다.
-
+배열 관리와 MAC 계산은 구현하고 검증했습니다. JSON 데이터 분석과 성능 측정은 아직 수행하지 않았습니다.
 실제 실행 후 다음 내용을 포함하여 최소 10줄 이상 작성합니다.
 
 - 전체 테스트 수, 통과 수, 실패 수
@@ -166,7 +167,7 @@ mini-npu/
 - [x] 제공된 data.json 확보와 구조 확인
 - [x] Git 저장소 초기화와 첫 커밋
 - [x] 배열 관리 구현과 자동 검증 5개 통과
-- [ ] MAC 계산 구현
+- [x] MAC 계산 구현과 전체 자동 검증 12개 통과
 - [ ] 정규화와 epsilon 판정 구현
 - [ ] 사용자 입력 모드 구현
 - [ ] JSON 분석 모드 구현
@@ -184,5 +185,22 @@ Matrix 클래스로 배열 생성과 위치별 저장·조회를 구현했습니
 - 수행 기록: [2단계 문서](docs/02-matrix.md)
 - 검증 로그: [자동 검증 결과](docs/02-matrix-test-log.txt)
 
-MAC 계산과 두 입력 모드는 후속 단계에서 구현합니다.
+MAC 계산은 3단계에서 구현했습니다. 두 입력 모드는 후속 단계에서 구현합니다.
+## 11. 3단계 MAC 검증 결과
+
+같은 위치의 값을 곱하고 누적하는 mac_score() 함수를 반복문으로 구현했습니다.
+
+십자가·X의 네 조합에서 점수 5, 1, 1, 5를 확인했습니다.
+
+소수·음수·0 계산과 네 가지 배열 크기를 검증했습니다.
+
+크기 불일치, 잘못된 인수와 유한하지 않은 계산 결과의 거절도 확인했습니다.
+
+기존 배열 검사 5개와 새 MAC 검사 7개를 합쳐 총 12개가 통과했습니다.
+
+- 수행 기록: [3단계 문서](docs/03-mac.md)
+- 검증 로그: [MAC 검증 결과](docs/03-mac-test-log.txt)
+
+테스트 실행 시간은 성능 분석용 MAC 평균 시간이 아닙니다.
+라벨 정규화, epsilon 판정과 크기별 성능 측정은 후속 단계에서 구현합니다.
 

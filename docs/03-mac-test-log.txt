@@ -1,0 +1,29 @@
+test_independent_matrices (test_matrix.TestMatrix.test_independent_matrices)
+서로 다른 배열의 값이 독립적으로 유지된다. ... ok
+test_independent_rows (test_matrix.TestMatrix.test_independent_rows)
+한 행의 변경이 다른 행에 영향을 주지 않는다. ... ok
+test_invalid_positions (test_matrix.TestMatrix.test_invalid_positions)
+배열 범위를 벗어난 읽기와 쓰기를 거절한다. ... ok
+test_invalid_values (test_matrix.TestMatrix.test_invalid_values)
+숫자가 아니거나 유효하지 않은 실수를 거절한다. ... ok
+test_required_sizes (test_matrix.TestMatrix.test_required_sizes)
+네 가지 크기에서 생성과 저장·조회를 확인한다. ... ok
+test_cross_and_x_scores (test_mac.TestMac.test_cross_and_x_scores)
+십자가와 X의 네 가지 조합을 확인한다. ... ok
+test_decimal_and_negative_values (test_mac.TestMac.test_decimal_and_negative_values)
+소수와 음수가 포함된 계산을 확인한다. ... ok
+test_invalid_arguments (test_mac.TestMac.test_invalid_arguments)
+Matrix가 아닌 인수를 거절한다. ... ok
+test_nonfinite_result (test_mac.TestMac.test_nonfinite_result)
+큰 실수의 곱으로 무한대가 발생하면 거절한다. ... ok
+test_required_sizes (test_mac.TestMac.test_required_sizes)
+네 크기에서 모든 위치가 계산되는지 확인한다. ... ok
+test_size_mismatch (test_mac.TestMac.test_size_mismatch)
+서로 다른 크기의 배열은 계산하지 않는다. ... ok
+test_zero_pattern (test_mac.TestMac.test_zero_pattern)
+입력이 모두 0이면 점수도 0이다. ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.006s
+
+OK

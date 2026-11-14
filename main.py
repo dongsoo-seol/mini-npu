@@ -40,3 +40,26 @@ class Matrix:
             raise ValueError("NaN이나 무한대는 사용할 수 없습니다.")
 
         self.data[row][col] = value
+def mac_score(pattern, filter_data):
+    """같은 위치의 값을 곱하고 누적하여 점수를 반환한다."""
+    if not isinstance(pattern, Matrix):
+        raise TypeError("입력 패턴은 Matrix 객체여야 합니다.")
+
+    if not isinstance(filter_data, Matrix):
+        raise TypeError("필터는 Matrix 객체여야 합니다.")
+
+    if pattern.size != filter_data.size:
+        raise ValueError("패턴과 필터의 크기가 일치해야 합니다.")
+
+    total = 0
+
+    for row in range(pattern.size):
+        for col in range(pattern.size):
+            input_value = pattern.get_value(row, col)
+            filter_value = filter_data.get_value(row, col)
+            total += input_value * filter_value
+
+    if type(total) is float and not math.isfinite(total):
+        raise ValueError("MAC 계산 결과가 유한한 숫자가 아닙니다.")
+
+    return total

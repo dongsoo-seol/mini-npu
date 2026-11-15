@@ -587,3 +587,46 @@ def print_performance_table(measurements):
             f"{measured['repeats']} | "
             f"{source}"
         )
+def show_menu():
+    """사용할 입력 방식을 안내한다."""
+    print("\n=== Mini NPU 시뮬레이터 ===")
+    print("1. 사용자 입력 분석 (3x3)")
+    print("2. data.json 분석")
+    print("0. 종료")
+
+
+def read_menu_choice():
+    """올바른 메뉴 번호를 입력받는다."""
+    while True:
+        choice = input("선택: ").strip()
+
+        if choice in ("0", "1", "2"):
+            return choice
+
+        print("입력 오류: 0, 1, 2 중 하나를 입력하세요.")
+
+
+def main():
+    """메뉴 선택에 따라 분석을 실행한다."""
+    while True:
+        show_menu()
+        choice = read_menu_choice()
+
+        if choice == "1":
+            run_manual_mode()
+
+        elif choice == "2":
+            run_json_mode()
+
+        else:
+            print("프로그램을 종료합니다.")
+            return
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n입력이 취소되어 프로그램을 종료합니다.")
+    except EOFError:
+        print("\n입력이 종료되어 프로그램을 종료합니다.")

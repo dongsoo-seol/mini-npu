@@ -109,29 +109,41 @@ MAC 함수 내부의 검사와 값 조회 비용은 호출 시간에 포함된�
 
 ## 6. 실행 방법
 
-현재 main.py에는 배열을 관리하는 Matrix 클래스와 반복문 기반 MAC 계산 함수 mac_score()를 구현했습니다.
-최종 메뉴와 분석 실행 흐름은 아직 구현하지 않았습니다.
+Python 3.8 이상이 필요하며, 외부 라이브러리 설치는 필요하지 않습니다.
 
-배열 기능은 다음 명령으로 검증할 수 있습니다.
-
-python -m unittest -v test_matrix test_mac test_policies test_input test_json test_analysis test_performance
-구현 후 다음 명령으로 실행하도록 구성할 예정입니다.
+터미널에서 main.py가 있는 폴더로 이동한 뒤 실행합니다.
 
 ```powershell
 python main.py
-```프로그램 시작 시 사용자 입력 모드와 JSON 분석 모드를 선택하도록 구현합니다.
-
-제공된 원본 data.json을 main.py와 같은 폴더에 배치했습니다.
-
-기본 JSON 파일 경로는 main.py의 위치를 기준으로 처리합니다.
-
-JSON 모드는 다음 명령으로 직접 실행할 수 있습니다.
-
-```powershell
-python -c "from main import run_json_mode; run_json_mode()"
 ```
 
-두 모드에 성능 분석을 연결했습니다. 시작 메뉴는 후속 단계에서 구현합니다.
+| 메뉴 | 동작 |
+|---|---|
+| 1 | 3×3 필터 A·B와 패턴을 직접 입력하여 분석 |
+| 2 | data.json의 패턴을 일괄 분석 |
+| 0 | 프로그램 종료 |
+
+각 분석이 끝나면 메뉴로 돌아갑니다.
+잘못된 메뉴 번호는 안내 후 다시 입력받습니다.
+
+사용자 모드에서는 각 행의 숫자 3개를 공백으로 구분하고 Enter를 누릅니다.
+필터 A·B 입력 후 저장 내용을 확인하고, 이어서 패턴을 입력합니다.
+
+제공된 data.json은 main.py와 같은 폴더에 둡니다.
+파일 경로는 현재 작업 위치가 아니라 main.py의 위치를 기준으로 처리합니다.
+
+입력이 종료되거나 Ctrl+C로 중단하면 안내 후 프로그램을 종료합니다.
+
+### 자동 검증
+
+검사 파일들을 함께 보관한 개발 폴더에서는 다음 명령으로 검증합니다.
+
+```powershell
+python -m unittest -v test_matrix test_mac test_policies test_input test_json test_analysis test_performance test_console
+```
+
+자동 검증 62개가 통과했습니다.
+상세 로그는 docs/09-console-test-log.txt에 있습니다.
 ## 7. 현재 파일 구조
 
 ```text
@@ -141,6 +153,7 @@ mini-npu/
 |-- data.json
 |-- main.py
 |-- test_analysis.py
+|-- test_console.py
 |-- test_input.py
 |-- test_json.py
 |-- test_mac.py
@@ -164,6 +177,8 @@ mini-npu/
     |-- 08-performance-results.json
     |-- 08-performance-test-log.txt
     |-- 08-performance.md
+    |-- 09-console-test-log.txt
+    |-- 09-console.md
     |-- requirements-checklist.md
 ```
 
@@ -228,7 +243,8 @@ mini-npu/
 - [x] JSON 로드와 구조·크기 검증 구현
 - [x] JSON 케이스별 판정과 FAIL 처리 연결
 - [x] 성능 분석과 결과 요약 구현
-- [ ] 정상·오류 입력과 재현성 검증
+- [x] 정상·오류 입력과 재현성 검증
+- [x] 시작 메뉴와 두 모드 선택 및 종료
 - [ ] 최종 README와 제출 자료 정리
 ## 10. 2단계 검증 결과
 

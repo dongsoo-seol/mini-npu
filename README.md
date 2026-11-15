@@ -77,7 +77,7 @@ JSON 분석에서는 표준 라벨 Cross와 X를 사용합니다.
 
 점수 비교에는 epsilon을 사용합니다.
 
-계획한 기준은 다음과 같습니다.
+구현하고 검증한 기준은 다음과 같습니다.
 ```text
 epsilon = 1e-9
 abs(점수 A - 점수 B) < epsilon이면 동점
@@ -109,7 +109,7 @@ MAC 함수 호출 구간을 크기별 최소 10회 측정하고 평균 시간을
 
 배열 기능은 다음 명령으로 검증할 수 있습니다.
 
-python -m unittest -v test_matrix test_mac
+python -m unittest -v test_matrix test_mac test_policies
 
 구현 후 다음 명령으로 실행하도록 구성할 예정입니다.
 
@@ -125,19 +125,22 @@ data.json은 과제에서 제공한 원본을 확보한 뒤 main.py와 같은 �
 
 ```text
 mini-npu/
- .gitignore
- README.md
- data.json
- main.py
- test_matrix.py
- test_mac.py
- docs/
-    01-setup.md
-    requirements-checklist.md
-    02-matrix.md
-    02-matrix-test-log.txt
-    03-mac.md
-    03-mac-test-log.txt
+|-- .gitignore
+|-- README.md
+|-- data.json
+|-- main.py
+|-- test_mac.py
+|-- test_matrix.py
+|-- test_policies.py
++-- docs/
+    |-- 01-setup.md
+    |-- 02-matrix-test-log.txt
+    |-- 02-matrix.md
+    |-- 03-mac-test-log.txt
+    |-- 03-mac.md
+    |-- 04-policies.md
+    |-- 04-policy-test-log.txt
+    |-- requirements-checklist.md
 ```
 
 ## 8. 결과 리포트
@@ -168,7 +171,7 @@ mini-npu/
 - [x] Git 저장소 초기화와 첫 커밋
 - [x] 배열 관리 구현과 자동 검증 5개 통과
 - [x] MAC 계산 구현과 전체 자동 검증 12개 통과
-- [ ] 정규화와 epsilon 판정 구현
+- [x] 정규화와 epsilon 판정 구현
 - [ ] 사용자 입력 모드 구현
 - [ ] JSON 분석 모드 구현
 - [ ] 성능 분석과 결과 요약 구현
@@ -202,5 +205,41 @@ MAC 계산은 3단계에서 구현했습니다. 두 입력 모드는 후속 단�
 - 검증 로그: [MAC 검증 결과](docs/03-mac-test-log.txt)
 
 테스트 실행 시간은 성능 분석용 MAC 평균 시간이 아닙니다.
-라벨 정규화, epsilon 판정과 크기별 성능 측정은 후속 단계에서 구현합니다.
+라벨 정규화와 epsilon 판정은 4단계에서 구현했습니다. 크기별 성능 측정은 후속 단계에서 구현합니다.
+## 12. 4단계 정규화와 판정 검증 결과
+
+normalize_label()과 compare_scores()를 구현했습니다.
+
+### 라벨 정규화
+
+앞뒤 공백을 제거하고 대소문자 차이를 처리한 뒤 표준 라벨로 변환합니다.
+
+- +, cross, Cross → Cross
+- x, X → X
+- 알 수 없는 라벨 → 오류로 안내
+
+UNDECIDED는 모양 라벨이 아니라 판정 보류 상태입니다.
+
+### 점수 비교 정책
+
+기본 epsilon은 1e-9입니다.
+
+abs(score_a - score_b) < epsilon이면 UNDECIDED를 반환합니다.
+
+차이가 epsilon과 같으면 동점이 아닙니다.
+동점이 아니면 높은 점수에 따라 A 또는 B를 반환합니다.
+
+사용자 입력 모드에서는 A/B/판정 불가로 표시할 예정입니다.
+JSON 모드에서는 Cross 점수를 첫 번째, X 점수를 두 번째로 전달하여 결과를 Cross/X/UNDECIDED로 연결할 예정입니다.
+
+### 검증 결과
+
+별칭, 공백, 대소문자, 정확한 동점, 근소한 점수 차이, epsilon 경계와 잘못된 값의 거절을 확인했습니다.
+
+기존 12개와 새 정책 검사 8개를 합쳐 총 20개 테스트가 통과했습니다.
+
+- 수행 기록: [4단계 문서](docs/04-policies.md)
+- 검증 로그: [정책 검증 결과](docs/04-policy-test-log.txt)
+
+실제 JSON 케이스의 판정과 PASS/FAIL 비교는 아직 수행하지 않았습니다.
 

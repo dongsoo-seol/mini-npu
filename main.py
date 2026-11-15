@@ -63,3 +63,49 @@ def mac_score(pattern, filter_data):
         raise ValueError("MAC 계산 결과가 유한한 숫자가 아닙니다.")
 
     return total
+def normalize_label(label):
+    """라벨 표현을 Cross 또는 X로 통일한다."""
+    if not isinstance(label, str):
+        raise TypeError("라벨은 문자열이어야 합니다.")
+
+    cleaned = label.strip().casefold()
+
+    aliases = {
+        "+": "Cross",
+        "cross": "Cross",
+        "x": "X",
+    }
+
+    if cleaned not in aliases:
+        raise ValueError(f"알 수 없는 라벨입니다: {label!r}")
+
+    return aliases[cleaned]
+
+EPSILON = 1e-9
+
+
+def compare_scores(score_a, score_b, epsilon=EPSILON):
+    """허용오차를 적용하여 A, B, UNDECIDED를 반환한다."""
+    values = (
+        ("A 점수", score_a),
+        ("B 점수", score_b),
+        ("epsilon", epsilon),
+    )
+
+    for name, value in values:
+        if type(value) not in (int, float):
+            raise TypeError(f"{name}는 정수 또는 실수여야 합니다.")
+
+        if type(value) is float and not math.isfinite(value):
+            raise ValueError(f"{name}는 유한한 숫자여야 합니다.")
+
+    if epsilon <= 0:
+        raise ValueError("epsilon은 0보다 커야 합니다.")
+
+    if abs(score_a - score_b) < epsilon:
+        return "UNDECIDED"
+
+    if score_a > score_b:
+        return "A"
+
+    return "B"

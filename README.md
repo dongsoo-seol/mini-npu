@@ -109,18 +109,16 @@ MAC 함수 호출 구간을 크기별 최소 10회 측정하고 평균 시간을
 
 배열 기능은 다음 명령으로 검증할 수 있습니다.
 
-python -m unittest -v test_matrix test_mac test_policies test_input
-
+python -m unittest -v test_matrix test_mac test_policies test_input test_json
 구현 후 다음 명령으로 실행하도록 구성할 예정입니다.
 
 ```powershell
 python main.py
 ```프로그램 시작 시 사용자 입력 모드와 JSON 분석 모드를 선택하도록 구현합니다.
 
-data.json은 과제에서 제공한 원본을 확보한 뒤 main.py와 같은 폴더에 배치합니다.
+제공된 원본 data.json을 main.py와 같은 폴더에 배치했습니다.
 
-파일 경로는 main.py의 위치를 기준으로 처리할 예정입니다.
-
+기본 JSON 파일 경로는 main.py의 위치를 기준으로 처리합니다.
 ## 7. 현재 파일 구조
 
 ```text
@@ -130,6 +128,7 @@ mini-npu/
 |-- data.json
 |-- main.py
 |-- test_input.py
+|-- test_json.py
 |-- test_mac.py
 |-- test_matrix.py
 |-- test_policies.py
@@ -143,6 +142,8 @@ mini-npu/
     |-- 04-policy-test-log.txt
     |-- 05-input-test-log.txt
     |-- 05-input.md
+    |-- 06-json-test-log.txt
+    |-- 06-json.md
     |-- requirements-checklist.md
 ```
 
@@ -177,7 +178,8 @@ mini-npu/
 - [x] 정규화와 epsilon 판정 구현
 - [x] 사용자 입력·재입력·MAC 판정 연결
 - [ ] 사용자 입력 모드의 3×3 성능 분석 연결
-- [ ] JSON 분석 모드 구현
+- [x] JSON 로드와 구조·크기 검증 구현
+- [ ] JSON 케이스별 판정과 FAIL 처리 연결
 - [ ] 성능 분석과 결과 요약 구현
 - [ ] 정상·오류 입력과 재현성 검증
 - [ ] 최종 README와 제출 자료 정리
@@ -284,4 +286,41 @@ X 입력, 필터 순서 교환, 동점, epsilon 적용, 출력 순서와 계산 
 
 3×3 성능 분석은 아직 연결하지 않았습니다.
 시작 메뉴, JSON 분석과 최종 결과 리포트도 후속 단계에서 구현합니다.
+## 14. 6단계 JSON 준비 기능 검증 결과
 
+matrix_from_rows(), load_json_data(), parse_case_size(), prepare_case()를 구현했습니다.
+
+### 처리 방식
+
+main.py와 같은 폴더의 data.json을 UTF-8 BOM까지 처리하여 읽습니다.
+
+최상위 구조와 filters·patterns 항목을 확인합니다.
+
+케이스 식별자에서 N을 추출하여 해당 size_N 필터를 선택합니다.
+
+패턴과 필터의 행·열 개수, 숫자 값, 라벨과 필수 항목을 검사한 뒤 Matrix로 변환합니다.
+
+필터 라벨은 Cross/X로 정규화하며, 정규화 후 중복이나 필터 누락을 거절합니다.
+
+### 원본으로 확인한 내용
+
+원본에는 크기별 필터 3묶음과 패턴 6개가 있습니다.
+
+size_5_1을 준비한 결과는 크기 5, 필터 이름 Cross/X, 정규화한 기대값 X였습니다.
+
+원본 파일을 수정하지 않고 계산용 자료를 준비했습니다.
+
+### 자동 검증 결과
+
+임시 파일과 시험용 자료로 파일 오류, 구조·크기 오류, 라벨 오류, 필터 누락·중복과 원본 유지 여부를 확인했습니다.
+
+기존 27개와 새 JSON 검사 8개를 합쳐 총 35개 테스트가 통과했습니다.
+
+- 수행 기록: [6단계 문서](docs/06-json.md)
+- 검증 로그: [JSON 검증 결과](docs/06-json-test-log.txt)
+
+### 남은 작업
+
+원본 6개 패턴 전체의 MAC 점수와 PASS/FAIL은 아직 확인하지 않았습니다.
+
+현재 검증 함수가 전달하는 오류를 케이스별 FAIL로 기록하고, 다음 케이스를 계속 분석하는 흐름은 후속 단계에서 연결합니다.

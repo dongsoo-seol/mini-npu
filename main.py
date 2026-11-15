@@ -190,3 +190,166 @@ def run_manual_mode():
         "score_b": score_b,
         "decision": decision,
     }
+def matrix_from_rows(rows, size, name="배열"):
+    """외부 배열의 구조와 값을 검사하여 Matrix로 변환한다."""
+    if type(size) is not int or size <= 0:
+        raise ValueError("배열 크기는 0보다 큰 정수여야 합니다.")
+
+    if not isinstance(rows, list):
+        raise ValueError(f"{name}: 배열은 리스트여야 합니다.")
+
+    if len(rows) != size:
+        raise ValueError(
+            f"{name}: 행 수가 {len(rows)}개입니다. "
+            f"{size}개여야 합니다."
+        )
+
+    for row_number, row in enumerate(rows, start=1):
+        if not isinstance(row, list):
+            raise ValueError(
+                f"{name}: {row_number}행은 리스트여야 합니다."
+            )
+
+        if len(row) != size:
+            raise ValueError(
+                f"{name}: {row_number}행의 열 수가 {len(row)}개입니다. "
+                f"{size}개여야 합니다."
+            )
+
+    matrix = Matrix(size)
+
+    for row_number, row in enumerate(rows):
+        for col_number, value in enumerate(row):
+            try:
+                matrix.set_value(row_number, col_number, value)
+            except (TypeError, ValueError) as error:
+                raise ValueError(
+                    f"{name}: {row_number + 1}행 "
+                    f"{col_number + 1}열 값 오류: {error}"
+                ) from error
+
+    return matrix
+def load_json_data(file_path=None):
+    """JSON 파일을 읽고 최상위 구조를 확인한다."""
+    import json
+    from pathlib import Path
+
+    if file_path is None:
+        path = Path(__file__).resolve().parent / "data.json"
+    else:
+        path = Path(file_path)
+
+    try:
+        with path.open("r", encoding="utf-8-sig") as file:
+            data = json.load(file)
+    except (OSError, UnicodeError, ValueError) as error:
+        raise ValueError(
+            f"JSON 파일을 읽을 수 없습니다: {path} / {error}"
+        ) from error
+
+    if not isinstance(data, dict):
+        raise ValueError("JSON 최상위 자료는 딕셔너리여야 합니다.")
+
+    for key in ("filters", "patterns"):
+        if key not in data:
+            raise ValueError(f"JSON에 {key} 항목이 없습니다.")
+
+        if not isinstance(data[key], dict):
+            raise ValueError(
+                f"JSON의 {key} 항목은 딕셔너리여야 합니다."
+            )
+
+    return data
+def parse_case_size(case_id):
+    """size_N_idx 형식의 식별자에서 N을 추출한다."""
+    import re
+
+    if not isinstance(case_id, str):
+        raise ValueError("케이스 식별자는 문자열이어야 합니다.")
+
+    matched = re.fullmatch(
+        r"size_([0-9]+)_([0-9]+)",
+        case_id,
+    )
+
+    if matched is None:
+        raise ValueError(
+            f"케이스 식별자 형식이 잘못되었습니다: {case_id!r}"
+        )
+
+    size = int(matched.group(1))
+
+    if size <= 0:
+        raise ValueError("케이스 크기는 0보다 커야 합니다.")
+
+    return size
+
+
+def prepare_case(case_id, case_data, all_filters):
+    """케이스와 해당 필터를 검증하고 계산용 자료를 준비한다."""
+    size = parse_case_size(case_id)
+
+    if not isinstance(case_data, dict):
+        raise ValueError("패턴 항목은 딕셔너리여야 합니다.")
+
+    for key in ("input", "expected"):
+        if key not in case_data:
+            raise ValueError(f"패턴에 {key} 항목이 없습니다.")
+
+    expected = normalize_label(case_data["expected"])
+
+    if not isinstance(all_filters, dict):
+        raise ValueError("filters 항목은 딕셔너리여야 합니다.")
+
+    filter_key = f"size_{size}"
+
+    if filter_key not in all_filters:
+        raise ValueError(f"{filter_key} 필터가 없습니다.")
+
+    group = all_filters[filter_key]
+
+    if not isinstance(group, dict):
+        raise ValueError(
+            f"{filter_key} 필터 묶음은 딕셔너리여야 합니다."
+        )
+
+    normalized_filters = {}
+
+    for label, rows in group.items():
+        standard = normalize_label(label)
+
+        if standard in normalized_filters:
+            raise ValueError(
+                f"{filter_key}: {standard} 필터가 중복되었습니다."
+            )
+
+        normalized_filters[standard] = rows
+
+    for required in ("Cross", "X"):
+        if required not in normalized_filters:
+            raise ValueError(
+                f"{filter_key}: {required} 필터가 없습니다."
+            )
+
+    converted_filters = {}
+
+    for label in ("Cross", "X"):
+        converted_filters[label] = matrix_from_rows(
+            normalized_filters[label],
+            size,
+            f"{filter_key}/{label}",
+        )
+
+    pattern = matrix_from_rows(
+        case_data["input"],
+        size,
+        f"{case_id}/input",
+    )
+
+    return {
+        "id": case_id,
+        "size": size,
+        "filters": converted_filters,
+        "pattern": pattern,
+        "expected": expected,
+    }

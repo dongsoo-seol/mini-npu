@@ -353,3 +353,157 @@ def prepare_case(case_id, case_data, all_filters):
         "pattern": pattern,
         "expected": expected,
     }
+def analyze_case(case_id, case_data, all_filters):
+    """케이스 하나를 분석하고 판정 또는 실패 사유를 반환한다."""
+    result = {
+        "id": case_id,
+        "score_cross": None,
+        "score_x": None,
+        "decision": None,
+        "expected": None,
+        "status": "FAIL",
+        "reason": "",
+    }
+
+    try:
+        prepared = prepare_case(
+            case_id, case_data, all_filters
+        )
+        result["expected"] = prepared["expected"]
+
+        result["score_cross"] = mac_score(
+            prepared["pattern"],
+            prepared["filters"]["Cross"],
+        )
+        result["score_x"] = mac_score(
+            prepared["pattern"],
+            prepared["filters"]["X"],
+        )
+
+        compared = compare_scores(
+            result["score_cross"],
+            result["score_x"],
+        )
+
+        result["decision"] = {
+            "A": "Cross",
+            "B": "X",
+            "UNDECIDED": "UNDECIDED",
+        }[compared]
+
+    except (ValueError, TypeError, ArithmeticError) as error:
+        result["reason"] = str(error)
+        return result
+
+    if result["decision"] == result["expected"]:
+        result["status"] = "PASS"
+    else:
+        result["reason"] = (
+            f"판정 {result['decision']}와 "
+            f"기대값 {result['expected']}가 일치하지 않습니다."
+        )
+
+    return result
+def analyze_all_cases(data):
+    """모든 케이스를 분석하고 통과·실패 수를 집계한다."""
+    if not isinstance(data, dict):
+        raise ValueError("분석 자료는 딕셔너리여야 합니다.")
+
+    for key in ("filters", "patterns"):
+        if not isinstance(data.get(key), dict):
+            raise ValueError(
+                f"분석 자료의 {key} 항목은 딕셔너리여야 합니다."
+            )
+
+    results = []
+
+    for case_id, case_data in data["patterns"].items():
+        result = analyze_case(
+            case_id,
+            case_data,
+            data["filters"],
+        )
+        results.append(result)
+
+    passed = sum(
+        result["status"] == "PASS"
+        for result in results
+    )
+    failures = [
+        result
+        for result in results
+        if result["status"] == "FAIL"
+    ]
+
+    return {
+        "results": results,
+        "total": len(results),
+        "passed": passed,
+        "failed": len(failures),
+        "failures": failures,
+    }
+def print_case_result(result):
+    """케이스의 점수, 판정과 실패 사유를 출력한다."""
+    print(f"\n[케이스: {result['id']}]")
+
+    for title, key in (
+        ("Cross 점수", "score_cross"),
+        ("X 점수", "score_x"),
+    ):
+        value = result[key]
+        displayed = value if value is not None else "계산 불가"
+        print(f"{title}: {displayed}")
+
+    decision = result["decision"]
+    expected = result["expected"]
+
+    print(
+        "판정:",
+        decision if decision is not None else "계산 불가",
+    )
+    print(
+        "기대값:",
+        expected if expected is not None else "확인 불가",
+    )
+    print("결과:", result["status"])
+
+    if result["reason"]:
+        print("실패 사유:", result["reason"])
+
+
+def print_summary(report):
+    """전체 집계와 실패 케이스 목록을 출력한다."""
+    print("\n=== 전체 분석 결과 ===")
+    print("전체 테스트 수:", report["total"])
+    print("통과 수:", report["passed"])
+    print("실패 수:", report["failed"])
+
+    print("\n[실패 케이스]")
+
+    if not report["failures"]:
+        print("없음")
+    else:
+        for result in report["failures"]:
+            print(f"- {result['id']}: {result['reason']}")
+
+
+def run_json_mode(file_path=None):
+    """JSON을 분석하고 케이스별 결과와 요약을 출력한다."""
+    try:
+        data = load_json_data(file_path)
+        report = analyze_all_cases(data)
+    except (ValueError, TypeError) as error:
+        print(f"\nJSON 분석을 시작할 수 없습니다: {error}")
+        return None
+
+    print("\n=== JSON 케이스별 분석 ===")
+
+    if report["total"] == 0:
+        print("분석할 패턴이 없습니다.")
+
+    for result in report["results"]:
+        print_case_result(result)
+
+    print_summary(report)
+
+    return report

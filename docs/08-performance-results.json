@@ -1,0 +1,30 @@
+[
+  {
+    "size": 3,
+    "average_ms": 0.011839999933727086,
+    "operations": 9,
+    "repeats": 10,
+    "source": "공통 측정용 배열(모든 값 1.0)"
+  },
+  {
+    "size": 5,
+    "average_ms": 0.02890000178012997,
+    "operations": 25,
+    "repeats": 10,
+    "source": "공통 측정용 배열(모든 값 1.0)"
+  },
+  {
+    "size": 13,
+    "average_ms": 0.1837699965108186,
+    "operations": 169,
+    "repeats": 10,
+    "source": "공통 측정용 배열(모든 값 1.0)"
+  },
+  {
+    "size": 25,
+    "average_ms": 1.1540999985300004,
+    "operations": 625,
+    "repeats": 10,
+    "source": "공통 측정용 배열(모든 값 1.0)"
+  }
+]

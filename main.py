@@ -184,7 +184,9 @@ def run_manual_mode():
     print(f"필터 A MAC 점수: {score_a:g}")
     print(f"필터 B MAC 점수: {score_b:g}")
     print(f"판정 결과: {displayed}")
-
+    measured = measure_mac_time(pattern, filter_a)
+    measured["source"] = "사용자 입력 패턴 / 필터 A"
+    print_performance_table([measured])
     return {
         "score_a": score_a,
         "score_b": score_b,
@@ -504,6 +506,84 @@ def run_json_mode(file_path=None):
     for result in report["results"]:
         print_case_result(result)
 
+    measurements = benchmark_sizes()
+    print_performance_table(measurements)
     print_summary(report)
 
     return report
+def measure_mac_time(pattern, filter_data, repeats=10):
+    """MAC 계산을 반복 측정하여 1회 평균 시간을 반환한다."""
+    import time
+
+    if type(repeats) is not int:
+        raise TypeError("측정 횟수는 정수여야 합니다.")
+
+    if repeats < 10:
+        raise ValueError("측정 횟수는 최소 10회여야 합니다.")
+
+    # 측정 전에 한 번 실행하여 인수를 확인하고 준비한다.
+    # 이 준비 실행은 평균 시간에 포함하지 않는다.
+    mac_score(pattern, filter_data)
+
+    total_seconds = 0.0
+
+    for _ in range(repeats):
+        started = time.perf_counter()
+        mac_score(pattern, filter_data)
+        total_seconds += time.perf_counter() - started
+
+    return {
+        "size": pattern.size,
+        "average_ms": total_seconds / repeats * 1000,
+        "operations": pattern.size * pattern.size,
+        "repeats": repeats,
+    }
+def make_benchmark_pair(size):
+    """동일한 숫자 조건의 성능 측정용 배열을 준비한다."""
+    pattern = Matrix(size)
+    filter_data = Matrix(size)
+
+    for row in range(size):
+        for col in range(size):
+            pattern.set_value(row, col, 1.0)
+            filter_data.set_value(row, col, 1.0)
+
+    return pattern, filter_data
+
+
+def benchmark_sizes(repeats=10):
+    """필수 네 크기의 MAC 평균 시간을 측정한다."""
+    measurements = []
+
+    for size in (3, 5, 13, 25):
+        pattern, filter_data = make_benchmark_pair(size)
+
+        measured = measure_mac_time(
+            pattern, filter_data, repeats
+        )
+        measured["source"] = "공통 측정용 배열(모든 값 1.0)"
+        measurements.append(measured)
+
+    return measurements
+
+
+def print_performance_table(measurements):
+    """측정이 끝난 결과를 표로 출력한다."""
+    print("\n=== MAC 성능 분석 ===")
+    print("측정 기준: 필터 하나의 MAC 호출 1회 평균")
+    print(
+        "크기(NxN) | 평균 시간(ms) | 연산 횟수(N²) "
+        "| 측정 횟수 | 자료"
+    )
+
+    for measured in measurements:
+        size = measured["size"]
+        source = measured.get("source", "전달받은 배열")
+
+        print(
+            f"{size}x{size} | "
+            f"{measured['average_ms']:.6f} | "
+            f"{measured['operations']} | "
+            f"{measured['repeats']} | "
+            f"{source}"
+        )

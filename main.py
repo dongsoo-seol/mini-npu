@@ -109,3 +109,84 @@ def compare_scores(score_a, score_b, epsilon=EPSILON):
         return "A"
 
     return "B"
+def read_matrix(size, name):
+    """숫자를 한 행씩 입력받아 정사각형 배열을 만든다."""
+    matrix = Matrix(size)
+    error_message = (
+        f"입력 형식 오류: 각 줄에 {size}개의 숫자를 "
+        "공백으로 구분해 입력하세요."
+    )
+
+    print(f"\n{name} 입력: {size}행을 입력하세요.")
+
+    for row in range(size):
+        while True:
+            parts = input(f"{row + 1}행: ").split()
+
+            if len(parts) != size:
+                print(error_message)
+                continue
+
+            try:
+                values = [float(part) for part in parts]
+            except ValueError:
+                print(error_message)
+                continue
+
+            if not all(math.isfinite(value) for value in values):
+                print("입력값 오류: NaN이나 무한대는 사용할 수 없습니다.")
+                continue
+
+            for col, value in enumerate(values):
+                matrix.set_value(row, col, value)
+
+            break
+
+    return matrix
+def print_matrix(matrix, name):
+    """저장된 배열을 행 단위로 출력한다."""
+    print(f"\n{name}")
+
+    for row in range(matrix.size):
+        line = [
+            f"{matrix.get_value(row, col):g}"
+            for col in range(matrix.size)
+        ]
+        print(" ".join(line))
+
+
+def run_manual_mode():
+    """3×3 필터 두 개와 패턴을 입력받아 분석한다."""
+    filter_a = read_matrix(3, "필터 A")
+    filter_b = read_matrix(3, "필터 B")
+
+    print("\n=== 필터 저장 확인 ===")
+    print_matrix(filter_a, "필터 A")
+    print_matrix(filter_b, "필터 B")
+
+    pattern = read_matrix(3, "입력 패턴")
+
+    try:
+        score_a = mac_score(pattern, filter_a)
+        score_b = mac_score(pattern, filter_b)
+        decision = compare_scores(score_a, score_b)
+    except ValueError as error:
+        print(f"\n계산 오류: {error}")
+        return None
+
+    displayed = (
+        "판정 불가"
+        if decision == "UNDECIDED"
+        else decision
+    )
+
+    print("\n=== 사용자 입력 분석 결과 ===")
+    print(f"필터 A MAC 점수: {score_a:g}")
+    print(f"필터 B MAC 점수: {score_b:g}")
+    print(f"판정 결과: {displayed}")
+
+    return {
+        "score_a": score_a,
+        "score_b": score_b,
+        "decision": decision,
+    }

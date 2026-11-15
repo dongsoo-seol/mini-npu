@@ -109,7 +109,7 @@ MAC 함수 호출 구간을 크기별 최소 10회 측정하고 평균 시간을
 
 배열 기능은 다음 명령으로 검증할 수 있습니다.
 
-python -m unittest -v test_matrix test_mac test_policies
+python -m unittest -v test_matrix test_mac test_policies test_input
 
 구현 후 다음 명령으로 실행하도록 구성할 예정입니다.
 
@@ -129,6 +129,7 @@ mini-npu/
 |-- README.md
 |-- data.json
 |-- main.py
+|-- test_input.py
 |-- test_mac.py
 |-- test_matrix.py
 |-- test_policies.py
@@ -140,6 +141,8 @@ mini-npu/
     |-- 03-mac.md
     |-- 04-policies.md
     |-- 04-policy-test-log.txt
+    |-- 05-input-test-log.txt
+    |-- 05-input.md
     |-- requirements-checklist.md
 ```
 
@@ -172,7 +175,8 @@ mini-npu/
 - [x] 배열 관리 구현과 자동 검증 5개 통과
 - [x] MAC 계산 구현과 전체 자동 검증 12개 통과
 - [x] 정규화와 epsilon 판정 구현
-- [ ] 사용자 입력 모드 구현
+- [x] 사용자 입력·재입력·MAC 판정 연결
+- [ ] 사용자 입력 모드의 3×3 성능 분석 연결
 - [ ] JSON 분석 모드 구현
 - [ ] 성능 분석과 결과 요약 구현
 - [ ] 정상·오류 입력과 재현성 검증
@@ -229,7 +233,7 @@ abs(score_a - score_b) < epsilon이면 UNDECIDED를 반환합니다.
 차이가 epsilon과 같으면 동점이 아닙니다.
 동점이 아니면 높은 점수에 따라 A 또는 B를 반환합니다.
 
-사용자 입력 모드에서는 A/B/판정 불가로 표시할 예정입니다.
+사용자 입력 모드에서는 A/B/판정 불가로 표시하도록 연결하고 검증했습니다.
 JSON 모드에서는 Cross 점수를 첫 번째, X 점수를 두 번째로 전달하여 결과를 Cross/X/UNDECIDED로 연결할 예정입니다.
 
 ### 검증 결과
@@ -242,4 +246,42 @@ JSON 모드에서는 Cross 점수를 첫 번째, X 점수를 두 번째로 전�
 - 검증 로그: [정책 검증 결과](docs/04-policy-test-log.txt)
 
 실제 JSON 케이스의 판정과 PASS/FAIL 비교는 아직 수행하지 않았습니다.
+
+## 13. 5단계 사용자 입력 검증 결과
+
+read_matrix(), print_matrix(), run_manual_mode()를 구현했습니다.
+
+필터 A 입력 → 필터 B 입력 → 저장 내용 확인 → 패턴 입력 → MAC 계산 → 판정 출력 순서로 동작합니다.
+
+### 현재 실행 방법
+
+프로그램 시작 메뉴는 아직 구현하지 않았으므로 다음 명령으로 사용자 모드를 직접 실행합니다.
+
+```powershell
+python -c "from main import run_manual_mode; run_manual_mode()"
+```
+
+### 직접 실행 결과
+
+필터 A에 십자가, 필터 B에 X, 패턴에 십자가를 입력했습니다.
+
+```text
+필터 A MAC 점수: 5
+필터 B MAC 점수: 1
+판정 결과: A
+```
+
+숫자 개수 오류, 문자와 빈 입력을 안내하고 해당 행을 다시 입력받는 것을 확인했습니다.
+
+### 자동 검증 결과
+
+X 입력, 필터 순서 교환, 동점, epsilon 적용, 출력 순서와 계산 오류 처리를 검증했습니다.
+
+기존 20개와 새 입력 검사 7개를 합쳐 총 27개 테스트가 통과했습니다.
+
+- 수행 기록: [5단계 문서](docs/05-input.md)
+- 검증 로그: [입력 검증 결과](docs/05-input-test-log.txt)
+
+3×3 성능 분석은 아직 연결하지 않았습니다.
+시작 메뉴, JSON 분석과 최종 결과 리포트도 후속 단계에서 구현합니다.
 

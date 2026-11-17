@@ -1,0 +1,54 @@
+{
+  "data": "全要素が1.0の同一入力・同一フィルター",
+  "timing": "変換・入出力を除くMAC関数呼び出し時間",
+  "results": [
+    {
+      "size": 3,
+      "operations": 9,
+      "repeats_per_round": 100,
+      "rounds": 5,
+      "samples_per_method": 500,
+      "original_ms": 0.019016599049791694,
+      "direct_2d_ms": 0.004149798885919154,
+      "flat_1d_ms": 0.003323401790112257,
+      "conversion_pair_ms": 0.012651000171899796,
+      "original_to_flat_ratio": 5.722028286308817
+    },
+    {
+      "size": 5,
+      "operations": 25,
+      "repeats_per_round": 100,
+      "rounds": 5,
+      "samples_per_method": 500,
+      "original_ms": 0.03961260081268847,
+      "direct_2d_ms": 0.0063950002659112215,
+      "flat_1d_ms": 0.0048675998114049435,
+      "conversion_pair_ms": 0.050683799432590604,
+      "original_to_flat_ratio": 8.138015109597726
+    },
+    {
+      "size": 13,
+      "operations": 169,
+      "repeats_per_round": 100,
+      "rounds": 5,
+      "samples_per_method": 500,
+      "original_ms": 0.25679980078712106,
+      "direct_2d_ms": 0.02922859857790172,
+      "flat_1d_ms": 0.02409019961487502,
+      "conversion_pair_ms": 0.23267900163773447,
+      "original_to_flat_ratio": 10.659928306636132
+    },
+    {
+      "size": 25,
+      "operations": 625,
+      "repeats_per_round": 100,
+      "rounds": 5,
+      "samples_per_method": 500,
+      "original_ms": 1.0228436009492725,
+      "direct_2d_ms": 0.10454879864118993,
+      "flat_1d_ms": 0.10081679874565452,
+      "conversion_pair_ms": 0.9974311998812482,
+      "original_to_flat_ratio": 10.145567144318395
+    }
+  ]
+}
